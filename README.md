@@ -1,0 +1,1 @@
+Mi idea es hacer el juego del uno pero más simplificado, es decir, sin la mecánica de decir uno cuando queda una carta y sin las cartas especiales como bloquear, Chupate4, etc. Aunque si veo que puedo incorporarlo más tarde lo intentaré.
