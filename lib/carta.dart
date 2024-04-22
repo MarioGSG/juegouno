@@ -5,7 +5,7 @@ class Carta {
   int? valor;
 
   Carta();
-  Carta.carta(color, valor);
+  Carta.carta(this.color, this.valor);
 
   elegirColor() {
     Map<int, String> colores = {
