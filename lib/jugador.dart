@@ -3,6 +3,7 @@ import 'package:juegouno/carta.dart';
 class Jugador {
   String? nombre;
   List<Carta> mano = [];
+  Map<int, Carta> cartasAsignadas = {};
 
   Jugador(this.nombre);
 
@@ -10,6 +11,4 @@ class Jugador {
     Carta carta = Carta.carta(Carta().elegirColor(), Carta().elegirValor());
     mano.add(carta);
   }
-
-  jugarCarta(carta) {}
 }

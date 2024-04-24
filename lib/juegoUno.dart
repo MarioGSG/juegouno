@@ -5,30 +5,51 @@ import 'package:juegouno/jugador.dart';
 import 'carta.dart';
 
 class JuegoUno {
-  List<Carta>? cartasJugadas;
   List<Jugador>? jugadores;
 
   JuegoUno(jugadores) {
     print('¡Bienvenido a UNO!');
     repartirCartas(jugadores);
-
-    for (Jugador elemento in jugadores) {
-      do {
-        stdout.writeln('Turno de ${elemento.nombre}:');
-        mostrarMano(elemento);
-        int respuesta = elegirCarta(elemento);
-        Map mazoCartas = mapearCarta(elemento, respuesta);
-        mazoCartas = jugarCarta(mazoCartas, respuesta);
+    Carta cartaEnJuego = Carta.carta(Carta().elegirColor(), Carta().elegirValor());
+    do {
+      for (Jugador jugador in jugadores) {
+        stdout.writeln('Turno de ${jugador.nombre}:');
+        stdout.writeln('carta en juego ${cartaEnJuego.valor} ${cartaEnJuego.color} :');
+        asignarCartas(jugador);
+        mostrarMano(jugador); //cambiar más tarde
+        int respuesta = elegirCarta(jugador);
+        do {
+          //refactorizar más tarde
+          if (jugador.cartasAsignadas[respuesta]?.valor == cartaEnJuego.valor || jugador.cartasAsignadas[respuesta]?.color == cartaEnJuego.color || respuesta == 0) {
+            cartaEnJuego = jugarCarta(jugador, respuesta);
+          } else {
+            stdout.writeln('carta no valida');
+            stdout.writeln('carta en juego ${cartaEnJuego.valor} ${cartaEnJuego.color} :');
+            mostrarMano(jugador);
+            respuesta = elegirCarta(jugador);
+          }
+        } while (jugador.cartasAsignadas[respuesta]?.valor != cartaEnJuego.valor || jugador.cartasAsignadas[respuesta]?.color != cartaEnJuego.color);
         comprobarVictoria(jugadores);
-      } while (true);
-    }
+      }
+    } while (true);
   }
 
   comprobarVictoria(jugadores) {
-    for (Jugador elemento in jugadores) {
-      if (elemento.mano.isEmpty) {
-        break;
+    for (Jugador jugador in jugadores) {
+      if (jugador.mano.isEmpty) {
+        print('${jugador.nombre} ha ganado');
+        break; //cambiar por menú
       }
+    }
+  }
+
+  asignarCartas(jugador) {
+    int contador = 1;
+    for (Carta carta in jugador.mano) {
+      jugador.cartasAsignadas.addAll({
+        contador: carta
+      });
+      contador += 1;
     }
   }
 
@@ -37,27 +58,14 @@ class JuegoUno {
     int? respuesta;
     do {
       respuesta = int.tryParse(stdin.readLineSync() ?? 'e');
-    } while (respuesta == null);
+    } while (respuesta == null); //solucionar error
     return respuesta;
   }
 
-  mapearCarta(jugador, respuesta) {
-    Map<int, Carta> mazoCartas = {};
-    int contador = 1;
-
-    for (var elemento in jugador.mano) {
-      mazoCartas.addAll({
-        contador: elemento
-      });
-      contador += 1;
-    }
-    return mazoCartas;
-  }
-
-  jugarCarta(mazoCartas, respuesta) {
-    print('has elegido: ${mazoCartas[respuesta]?.valor} ${mazoCartas[respuesta]?.color} ');
-    mazoCartas.remove(respuesta);
-    return mazoCartas;
+  jugarCarta(jugador, respuesta) {
+    print('has elegido: ${jugador.cartasAsignadas[respuesta]?.valor} ${jugador.cartasAsignadas[respuesta]?.color} ');
+    jugador.mano.remove(jugador.cartasAsignadas[respuesta]);
+    return jugador.cartasAsignadas[respuesta];
   }
 
   repartirCartas(jugadores) {
