@@ -13,25 +13,30 @@ class JuegoUno {
     Carta cartaEnJuego = Carta.carta(Carta().elegirColor(), Carta().elegirValor());
     do {
       for (Jugador jugador in jugadores) {
-        stdout.writeln('Turno de ${jugador.nombre}:');
-        stdout.writeln('carta en juego ${cartaEnJuego.valor} ${cartaEnJuego.color} :');
         asignarCartas(jugador);
-        mostrarMano(jugador); //cambiar más tarde
-        int respuesta = elegirCarta(jugador);
-        if (respuesta == 0) {
-          jugador.recibirCarta();
+        if (jugador.bot == true) {
+          cartaEnJuego = turnoBot(jugador, cartaEnJuego);
         } else {
-          do {
-            //refactorizar más tarde
-            if (jugador.cartasAsignadas[respuesta]?.valor == cartaEnJuego.valor || jugador.cartasAsignadas[respuesta]?.color == cartaEnJuego.color) {
-              cartaEnJuego = jugarCarta(jugador, respuesta);
-            } else {
-              stdout.writeln('carta no valida');
-              stdout.writeln('carta en juego ${cartaEnJuego.valor} ${cartaEnJuego.color} :');
-              mostrarMano(jugador);
-              respuesta = elegirCarta(jugador);
-            }
-          } while (jugador.cartasAsignadas[respuesta]?.valor != cartaEnJuego.valor || jugador.cartasAsignadas[respuesta]?.color != cartaEnJuego.color);
+          stdout.writeln('carta en juego ${cartaEnJuego.valor} ${cartaEnJuego.color}');
+          stdout.writeln('es tu turno!');
+          Jugador(jugador.nombre, jugador.bot).mostrarMano(jugador); //cambiar más tarde //cambiar propiedades constructor Jugador
+          int respuesta = elegirCarta(jugador);
+          if (respuesta == 0) {
+            //cambiar que si robas y coincide color o valor se pueda tirar.
+            jugador.recibirCarta();
+          } else {
+            do {
+              //refactorizar más tarde
+              if (jugador.cartasAsignadas[respuesta]?.valor == cartaEnJuego.valor || jugador.cartasAsignadas[respuesta]?.color == cartaEnJuego.color) {
+                cartaEnJuego = jugarCarta(jugador, respuesta);
+              } else {
+                stdout.writeln('carta no valida');
+                stdout.writeln('carta en juego ${cartaEnJuego.valor} ${cartaEnJuego.color} :');
+                Jugador(jugador.nombre, jugador.bot).mostrarMano(jugador);
+                respuesta = elegirCarta(jugador);
+              }
+            } while (jugador.cartasAsignadas[respuesta]?.valor != cartaEnJuego.valor || jugador.cartasAsignadas[respuesta]?.color != cartaEnJuego.color);
+          }
         }
         comprobarVictoria(jugadores);
       }
@@ -58,11 +63,11 @@ class JuegoUno {
   }
 
   elegirCarta(jugador) {
-    stdout.writeln('elige una carta');
     int? respuesta;
     do {
+      stdout.writeln('elige una carta');
       respuesta = int.tryParse(stdin.readLineSync() ?? 'e');
-    } while (respuesta == null); //solucionar error
+    } while (respuesta == null || respuesta > jugador.mano.length || respuesta < 0);
     return respuesta;
   }
 
@@ -80,13 +85,33 @@ class JuegoUno {
     }
   }
 
-  mostrarMano(jugador) {
-    int contador = 1;
-    print('cartas ${jugador.nombre}');
-    for (var jugador in jugador.mano) {
-      print('$contador) ${jugador.valor} ${jugador.color}');
-      contador += 1;
+  turnoBot(jugador, cartaEnJuego) {
+    var respuesta = responderbot(jugador, cartaEnJuego);
+    if (respuesta == 0) {
+      jugador.recibirCarta();
+      print('${jugador.nombre} ha robado');
+      return cartaEnJuego;
+    } else {
+      cartaEnJuego = jugarCartaBot(jugador, respuesta);
+      return cartaEnJuego;
     }
-    print('pulsa 0 para robar');
+  }
+
+  responderbot(jugador, cartaEnJuego) {
+    var respuesta;
+    for (Carta carta in jugador.mano) {
+      if (carta.valor == cartaEnJuego.valor || carta.color == cartaEnJuego.color) {
+        respuesta = carta;
+        return respuesta;
+      }
+    }
+    respuesta = 0;
+    return respuesta;
+  }
+
+  jugarCartaBot(jugador, respuesta) {
+    print('${jugador.nombre} ha elegido: ${respuesta.valor} ${respuesta.color} ');
+    jugador.mano.remove(respuesta);
+    return respuesta;
   }
 }
