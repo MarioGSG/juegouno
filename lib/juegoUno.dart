@@ -18,17 +18,21 @@ class JuegoUno {
         asignarCartas(jugador);
         mostrarMano(jugador); //cambiar más tarde
         int respuesta = elegirCarta(jugador);
-        do {
-          //refactorizar más tarde
-          if (jugador.cartasAsignadas[respuesta]?.valor == cartaEnJuego.valor || jugador.cartasAsignadas[respuesta]?.color == cartaEnJuego.color || respuesta == 0) {
-            cartaEnJuego = jugarCarta(jugador, respuesta);
-          } else {
-            stdout.writeln('carta no valida');
-            stdout.writeln('carta en juego ${cartaEnJuego.valor} ${cartaEnJuego.color} :');
-            mostrarMano(jugador);
-            respuesta = elegirCarta(jugador);
-          }
-        } while (jugador.cartasAsignadas[respuesta]?.valor != cartaEnJuego.valor || jugador.cartasAsignadas[respuesta]?.color != cartaEnJuego.color);
+        if (respuesta == 0) {
+          jugador.recibirCarta();
+        } else {
+          do {
+            //refactorizar más tarde
+            if (jugador.cartasAsignadas[respuesta]?.valor == cartaEnJuego.valor || jugador.cartasAsignadas[respuesta]?.color == cartaEnJuego.color) {
+              cartaEnJuego = jugarCarta(jugador, respuesta);
+            } else {
+              stdout.writeln('carta no valida');
+              stdout.writeln('carta en juego ${cartaEnJuego.valor} ${cartaEnJuego.color} :');
+              mostrarMano(jugador);
+              respuesta = elegirCarta(jugador);
+            }
+          } while (jugador.cartasAsignadas[respuesta]?.valor != cartaEnJuego.valor || jugador.cartasAsignadas[respuesta]?.color != cartaEnJuego.color);
+        }
         comprobarVictoria(jugadores);
       }
     } while (true);
@@ -77,11 +81,12 @@ class JuegoUno {
   }
 
   mostrarMano(jugador) {
-    print('cartas ${jugador.nombre}');
     int contador = 1;
+    print('cartas ${jugador.nombre}');
     for (var jugador in jugador.mano) {
       print('$contador) ${jugador.valor} ${jugador.color}');
       contador += 1;
     }
+    print('pulsa 0 para robar');
   }
 }
