@@ -7,6 +7,7 @@ class Carta {
   Carta();
   Carta.carta(this.color, this.valor);
 
+  //devuelve un color al azar
   elegirColor() {
     Map<int, String> colores = {
       1: 'verde',
@@ -18,6 +19,7 @@ class Carta {
     return colores[colorElegido];
   }
 
+  //devuelve un valor al azar
   elegirValor() {
     return Random().nextInt(9) + 1;
   }

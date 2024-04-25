@@ -6,13 +6,15 @@ class Jugador {
   Map<int, Carta> cartasAsignadas = {};
   bool? bot;
 
-  Jugador(this.nombre, this.bot);
+  Jugador.nombre(this.nombre, this.bot);
 
+  //accede al contructor de la carta para crear una y almacenarla en la mano del jugador
   recibirCarta() {
     Carta carta = Carta.carta(Carta().elegirColor(), Carta().elegirValor());
     mano.add(carta);
   }
 
+  //imprime la mano del jugador
   mostrarMano(jugador) {
     int contador = 1;
     print('tus cartas:');
@@ -21,5 +23,16 @@ class Jugador {
       contador += 1;
     }
     print('pulsa 0 para robar');
+  }
+
+  //a cada carta de la lista mano se le asigna un entero dentro de un map
+  asignarCartas(jugador) {
+    int contador = 1;
+    for (Carta carta in jugador.mano) {
+      jugador.cartasAsignadas.addAll({
+        contador: carta
+      });
+      contador += 1;
+    }
   }
 }
