@@ -114,16 +114,17 @@ class JuegoUno {
   // el jugador juega la carta seleccionada eliminadola así de su mano y devolviendo la carta en juego
   turnoJugador(jugador, cartaEnJuego) {
     stdout.writeln('carta en juego ${cartaEnJuego.valor} ${cartaEnJuego.color}');
+    int? respuesta;
     stdout.writeln('es tu turno!');
     Jugador.nombre(jugador.nombre, jugador.bot).mostrarMano(jugador);
-    int respuesta = responderJugador(jugador);
-    if (respuesta == 0) {
-      jugador.recibirCarta();
-      stdout.writeln('has robado un ${jugador.mano.last.valor} ${jugador.mano.last.color}');
-      cartaEnJuego = comprobarCartaRobada(jugador, cartaEnJuego);
-      return cartaEnJuego;
-    } else {
-      do {
+    do {
+      respuesta = responderJugador(jugador);
+      if (respuesta == 0) {
+        jugador.recibirCarta();
+        stdout.writeln('has robado un ${jugador.mano.last.valor} ${jugador.mano.last.color}');
+        cartaEnJuego = comprobarCartaRobada(jugador, cartaEnJuego);
+        return cartaEnJuego;
+      } else {
         if (jugador.cartasAsignadas[respuesta]?.valor == cartaEnJuego.valor || jugador.cartasAsignadas[respuesta]?.color == cartaEnJuego.color) {
           cartaEnJuego = jugarCarta(jugador, respuesta);
           return cartaEnJuego;
@@ -131,10 +132,9 @@ class JuegoUno {
           stdout.writeln('carta no valida');
           stdout.writeln('carta en juego ${cartaEnJuego.valor} ${cartaEnJuego.color}');
           Jugador.nombre(jugador.nombre, jugador.bot).mostrarMano(jugador);
-          respuesta = responderJugador(jugador); //decir uno cuando quede 1
         }
-      } while (jugador.cartasAsignadas[respuesta]?.valor != cartaEnJuego.valor || jugador.cartasAsignadas[respuesta]?.color != cartaEnJuego.color);
-    }
+      }
+    } while (jugador.cartasAsignadas[respuesta]?.valor != cartaEnJuego.valor || jugador.cartasAsignadas[respuesta]?.color != cartaEnJuego.color);
   }
 
   //comprueba si la carta que ha sido robada en el medio se puede lanzar
