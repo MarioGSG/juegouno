@@ -1,39 +1,55 @@
 import 'dart:io';
+import 'package:juegouno/app.dart';
 import 'package:juegouno/jugador.dart';
 import 'carta.dart';
 
 class JuegoUno {
   List<Jugador>? jugadores;
+  bool victoria = true;
 
-  JuegoUno(jugadores) {
+  //ejecuta el juego mediante una for in metido en un bucle que se repite hasta que un jugador se quede in cartas
+  juegoUno(jugadores, jugador) async {
     print('¡Bienvenido a UNO!');
     repartirCartas(jugadores); // se reparte 7 cartas a cada jugador
     Carta cartaEnJuego = Carta.carta(Carta().elegirColor(), Carta().elegirValor()); //se asigna la carta del medio
     do {
-      for (Jugador jugador in jugadores) {
+      for (Jugador jugadorTurno in jugadores) {
         //recorre la lista de los jugadores
-        Jugador.nombre(jugador.nombre, jugador.bot).asignarCartas(jugador); //cada carta se asigna con un número en un map
-        if (jugador.bot == true) {
+        Jugador.crearPersonaje(jugadorTurno.nombre, jugadorTurno.bot).asignarCartas(jugadorTurno); //cada carta se asigna con un número en un map
+        if (jugadorTurno.bot == true) {
           // comprueba si el jugador es un bot o la persona que está jugando
-          cartaEnJuego = turnoBot(jugador, cartaEnJuego); //turno del bot
-          comprobarVictoria(jugadores); //comprueba victoria
+          cartaEnJuego = turnoBot(jugadorTurno, cartaEnJuego); //turno del bot
+          victoria = await comprobarVictoria(jugadores, jugador); //comprueba victoria
+          if (victoria == false) {
+            break;
+          }
         } else {
-          cartaEnJuego = turnoJugador(jugador, cartaEnJuego); //turno del jugador
-          comprobarVictoria(jugadores); //comprueba victoria
+          cartaEnJuego = turnoJugador(jugadorTurno, cartaEnJuego); //turno del jugador
+          victoria = await comprobarVictoria(jugadores, jugador); //comprueba victoria
+          if (victoria == false) {
+            break;
+          }
         }
       }
-    } while (true);
+    } while (victoria);
+    await Jugador().sumarPartidaJugada(jugador); //suma una partida jugada a las estadísticas de la base de datos
+    App().menuLogin(jugador); //devuelve al menú
   }
 
-  //esta función comprueba si alguno de los jugadores tiene la lista jugador.mano vacía, es así escribe que ha ganado y le envía de nuevo al menú
-  //si no continúa como si nada
-  comprobarVictoria(jugadores) {
-    for (Jugador jugador in jugadores) {
-      if (jugador.mano.isEmpty) {
-        print('${jugador.nombre} ha ganado');
-        break; //cambiar por menú
+  //esta función comprueba si alguno de los jugadores tiene la lista jugador.mano vacía, es así devuelve false para que se acabe el bucle y
+  //si es el jugador principal el que tiene la mano vacía, le suma una victoria
+
+  comprobarVictoria(jugadores, jugador) async {
+    for (Jugador ganador in jugadores) {
+      if (ganador.mano.isEmpty) {
+        print('${ganador.nombre} ha ganado');
+        if (ganador.nombre == jugador.nombre) {
+          await Jugador().sumarPartidaGanada(jugador);
+        }
+        return false;
       }
     }
+    return true;
   }
 
   //esta función pregunta la carta y si es posible la almacena en "respuesta"
@@ -104,7 +120,7 @@ class JuegoUno {
 
   //recibe la carta de la respuesta, la elimina de su mano y la envía a cartaEnJuego pero con un mensaje diferente
   jugarCartaRobada(jugador, respuesta) {
-    print('${jugador.nombre} ha tenido suerte y lanza: ${respuesta.valor} ${respuesta.color} ');
+    stdout.writeln('${jugador.nombre} ha tenido suerte y lanza: ${respuesta.valor} ${respuesta.color}');
     jugador.mano.remove(respuesta);
     return respuesta;
   }
@@ -116,7 +132,7 @@ class JuegoUno {
     stdout.writeln('carta en juego ${cartaEnJuego.valor} ${cartaEnJuego.color}');
     int? respuesta;
     stdout.writeln('es tu turno!');
-    Jugador.nombre(jugador.nombre, jugador.bot).mostrarMano(jugador);
+    Jugador.crearPersonaje(jugador.nombre, jugador.bot).mostrarMano(jugador);
     do {
       respuesta = responderJugador(jugador);
       if (respuesta == 0) {
@@ -131,7 +147,7 @@ class JuegoUno {
         } else {
           stdout.writeln('carta no valida');
           stdout.writeln('carta en juego ${cartaEnJuego.valor} ${cartaEnJuego.color}');
-          Jugador.nombre(jugador.nombre, jugador.bot).mostrarMano(jugador);
+          Jugador.crearPersonaje(jugador.nombre, jugador.bot).mostrarMano(jugador);
         }
       }
     } while (jugador.cartasAsignadas[respuesta]?.valor != cartaEnJuego.valor || jugador.cartasAsignadas[respuesta]?.color != cartaEnJuego.color);

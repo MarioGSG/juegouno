@@ -34,7 +34,9 @@ class Database {
     await conn.query(''' CREATE TABLE IF NOT EXISTS jugador(
         idjugador INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
         nombre VARCHAR(50) NOT NULL UNIQUE,
-        password VARCHAR(10) NOT NULL
+        password VARCHAR(10) NOT NULL,
+        partidasJugadas INT DEFAULT 0,
+        partidasGanadas INT DEFAULT 0 
       )''');
   }
 

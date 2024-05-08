@@ -6,17 +6,23 @@ class Jugador {
   int? idjugador;
   String? nombre;
   String? password;
+  int? partidasJugadas;
+  int? partidasGanadas;
   //
   List<Carta> mano = [];
   Map<int, Carta> cartasAsignadas = {};
   bool? bot;
 
   Jugador();
-  Jugador.nombre(this.nombre, this.bot);
+  Jugador.crearPersonaje(this.nombre, this.bot);
   Jugador.fromMap(ResultRow map) {
     idjugador = map['idjugador'];
     nombre = map['nombre'];
     password = map['password'];
+  }
+  Jugador.fromMapEstadisticas(ResultRow map) {
+    partidasGanadas = map['partidasGanadas'];
+    partidasJugadas = map['partidasJugadas'];
   }
 
   //accede al contructor de la carta para crear una y almacenarla en la mano del jugador
@@ -79,6 +85,38 @@ class Jugador {
       }
     } catch (e) {
       return false;
+    } finally {
+      await conn.close();
+    }
+  }
+
+  //se conecta con la base de datos y cambia la columna partida ganadas sumandole uno
+  sumarPartidaGanada(jugador) async {
+    var conn = await Database().conexion();
+    await conn.query('''UPDATE jugador
+    SET partidasGanadas = jugador.partidasGanadas + 1
+    WHERE idjugador = ${jugador.idjugador}
+    ''');
+  }
+
+  //se conecta con la base de datos y cambia la columna partida jugada sumandole uno
+  sumarPartidaJugada(jugador) async {
+    var conn = await Database().conexion();
+    await conn.query('''UPDATE jugador
+    SET partidasJugadas = jugador.partidasJugadas + 1
+    WHERE idjugador = ${jugador.idjugador}
+    ''');
+  }
+
+  //saca las estadísticas del jugador
+  all(jugador) async {
+    var conn = await Database().conexion();
+    try {
+      var listado = await conn.query('SELECT * FROM jugador WHERE idjugador = ${jugador.idjugador}');
+      List<Jugador> jugadores = listado.map((row) => Jugador.fromMapEstadisticas(row)).toList();
+      return jugadores;
+    } catch (e) {
+      print(e);
     } finally {
       await conn.close();
     }

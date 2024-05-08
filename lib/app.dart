@@ -59,7 +59,7 @@ class App {
   }
 
   //menú en el que se elige una opción una vez se ha registrado
-  menuLogin(Jugador jugador) async {
+  menuLogin(jugador) async {
     String? respuesta;
     do {
       stdout.writeln('''hola ${jugador.nombre} elige una de estas opciones:
@@ -71,11 +71,11 @@ class App {
 
     switch (respuesta) {
       case '1':
-        iniciarUno();
+        iniciarUno(jugador);
         break;
       case '2':
-        print('todavía no está implementada esta opción');
-        break;
+        await imprimirEstadisticas(jugador);
+        menuLogin(jugador);
       case '3':
         print('enga chao');
         break;
@@ -84,16 +84,28 @@ class App {
 
   //este método crea tres jugadores, uno de ellos con el nombre del jugador registrado, y se define si el jugador es un bot. esos jugadores
   // se meten en una lista que se envía al constructor de juegoUno desde donde se inicia el juego
-  iniciarUno() {
-    Jugador jugador1 = Jugador.nombre('${Jugador.nombre}', false);
-    Jugador jugador2 = Jugador.nombre('bot 1', true);
-    Jugador jugador3 = Jugador.nombre('bot 2', true); //seleccionar cantidad bots
+  iniciarUno(jugador) {
+    Jugador jugador1 = Jugador.crearPersonaje('${jugador.nombre}', false);
+    Jugador jugador2 = Jugador.crearPersonaje('bot 1', true);
+    Jugador jugador3 = Jugador.crearPersonaje('bot 2', true); //seleccionar cantidad bots
 
     List<Jugador> jugadores = [
       jugador1,
       jugador2,
       jugador3
     ];
-    JuegoUno(jugadores);
+    JuegoUno().juegoUno(jugadores, jugador);
+  }
+
+  //imprime las estadisticas que le ha enviado el método all
+  imprimirEstadisticas(jugador) async {
+    List estadisticasJugador = await Jugador().all(jugador);
+
+    for (Jugador elemento in estadisticasJugador) {
+      stdout.writeln('''
+    partidas Jugadas -> ${elemento.partidasJugadas}
+    partidas Ganadas -> ${elemento.partidasGanadas}
+      ''');
+    }
   }
 }
