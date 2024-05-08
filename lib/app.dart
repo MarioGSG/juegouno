@@ -122,7 +122,7 @@ class App {
     do {
       stdout.writeln('elige la cantidad de bots (1-5)');
       opcion = int.tryParse(stdin.readLineSync() ?? 'e');
-    } while (opcion == null || opcion > 5 && opcion < 0);
+    } while (opcion == null || opcion > 5 || opcion < 0);
     return opcion + 1;
   }
 }
