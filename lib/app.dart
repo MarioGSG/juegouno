@@ -85,15 +85,7 @@ class App {
   //este método crea tres jugadores, uno de ellos con el nombre del jugador registrado, y se define si el jugador es un bot. esos jugadores
   // se meten en una lista que se envía al constructor de juegoUno desde donde se inicia el juego
   iniciarUno(jugador) {
-    Jugador jugador1 = Jugador.crearPersonaje('${jugador.nombre}', false);
-    Jugador jugador2 = Jugador.crearPersonaje('bot 1', true);
-    Jugador jugador3 = Jugador.crearPersonaje('bot 2', true); //seleccionar cantidad bots
-
-    List<Jugador> jugadores = [
-      jugador1,
-      jugador2,
-      jugador3
-    ];
+    List<Jugador> jugadores = crearJugadores(jugador);
     JuegoUno().juegoUno(jugadores, jugador);
   }
 
@@ -107,5 +99,30 @@ class App {
     partidas Ganadas -> ${elemento.partidasGanadas}
       ''');
     }
+  }
+
+  //almacena la respuesta del usuario, crea al jugador principal y según la respuesta crea una cantidad de bots
+  crearJugadores(jugador) {
+    int contador = preguntarCantidadBot();
+    Jugador jugadorPrincipal = Jugador.crearPersonaje('${jugador.nombre}', false);
+    List<Jugador> jugadores = [
+      jugadorPrincipal
+    ];
+    for (int i = 1; i < contador; i++) {
+      Jugador bot = Jugador.crearPersonaje('bot $i', true);
+      jugadores.add(bot);
+    }
+    return jugadores;
+  }
+
+  //pregunta la cantidad y devuelve la respuesta
+  preguntarCantidadBot() {
+    int? opcion;
+
+    do {
+      stdout.writeln('elige la cantidad de bots (1-5)');
+      opcion = int.tryParse(stdin.readLineSync() ?? 'e');
+    } while (opcion == null || opcion > 5 && opcion < 0);
+    return opcion + 1;
   }
 }
